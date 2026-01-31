@@ -1,79 +1,95 @@
-# Mini-Project #3: Database & Backend API Integration
+# Mini-Project 3
 
-## Overview
+## Project Overview
 
-This project is designed to consolidate the material learned in **Modules 8 and 9** regarding the use of databases. The primary goal is to create a real-time database that functions by fetching data externally via an API.
+This project is a backend API that provides topical Bible verses based on curated themes such as life events or emotional states. The application integrates with an external Bible API, stores the data in a MySQL database, and exposes REST endpoints for interacting with the data. All functionality is demonstrated using API tools such as Hoppscotch.
 
-Unlike previous projects, a front-end interface is not strictly required; functionality should be demonstrated via backend tools.
+### External Data Source: Bible API
 
-## Timeframe & Workload
+This project integrates with the **Bible API** by wldeh, a free and publicly accessible REST API that provides Bible verses and chapters in JSON format. (https://github.com/wldeh/bible-api)
 
-- **Duration:** You should aim for **8–10 hours** of work.
-- **Deadline:** This project is assigned at the end of **Module 9**.
-- **Planning:** Spending more than 10 hours suggests over-complication, while significantly less may indicate a lack of depth in showcasing required skills.
+- No API key or authentication is required
+- Supports multiple Bible versions (e.g., ASV, KJV)
+- Provides verse-level and chapter-level access
+- Serves public-domain Bible translations
 
-## Technical Requirements
+The Bible API is used during the application startup process to fetch specific verses based on predefined topics. These verses are then stored locally in the MySQL database so the application does not rely on the external API for every request.
 
-Your application must adhere to the following technical specifications:
+To obtain a specific verse, send a request to the following endpoint:
+`https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/${version}/books/${book}/chapters/${chapter}/verses/${verse}.json`
+Replace ${version}, ${book}, ${chapter}, and ${verse} with the appropriate values.
 
-- **Architecture:** The project must follow the **MVC (Model-View-Controller)** model.
-- **Data Integration:** Include a start-up routine that initially fetches data from an external API and populates your database.
+Example: Fetch John 3:16 in the King James Version (KJV):
+`https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/en-kjv/books/john/chapters/3/verses/16.json`
 
-- **Database Structure:** Your database structure should reflect the structure of the data returned from the external API.
-- **Functionality:** All **CRUD (Create, Read, Update, Delete)** operations must be included.
-- **Demonstration:** As a front-end is not required, you must demonstrate your application's functionality using **Postman** or **Swagger**.
+### Core Functionality
 
-## Project Process
+- Fetch Bible verses from an external Bible API during application startup
+- Populate and persist topics and verses in a MySQL database
+- Provide REST API endpoints for retrieving topics and verses
+- Allow users to save favorite topics or verses
+- Track user interaction history (e.g., viewed topics or verses)
+- Support full CRUD (Create, Read, Update, Delete) operations on core resources
 
-1. **Design Phase:** Before writing code, you must document the functionality, user capabilities, and visual layout (if applicable). You must include design and requirements specifications.
-2. **Implementation:** Build the application aiming for the 8-10 hour window.
+### User Capabilities
 
-## Project Options
+Users of the system can:
 
-Choose **one** of the following paths for your application content:
+- Create or select a user session
+- View a list of available topics
+- Retrieve verses associated with a topic
+- Save (favorite) topics or verses
+- View their saved favorites
+- View a history of their interactions
 
-### Option 1: Project Continuation
+### Application Architecture (Visual Layout)
 
-Continue building out the project you have been working on for the previous Mini-Projects (#1 and #2). Extend its backend capabilities to meet the technical requirements above.
+The application is structured as two backend services:
 
-### Option 2: Real-World Application
+- **Content Service (Port 3001)**
+  - Manages topics and verses
+  - Integrates with the external Bible API
+  - Handles content-related database operations
 
-Find a person, company, or website that desperately needs a new or modernized website/backend. Offer to build it for them.
+- **User Service (Port 3002)**
+  - Manages users, favorites, and history
+  - Handles user-specific data and interactions
 
-> [!NOTE] 
-> This option may take more time and planning, but offers meaningful learning in client communication, requirements gathering, and professional delivery.
-
-## Presentation Guidelines
-
-You will give a **5–10 minute presentation** to trainers and students. You must demonstrate what the application does, how it works, and the code used to implement it.
-
-**Be prepared to answer the following questions:**
-
-1. What was your requirements gathering and design process? Was it useful/successful? 
-2. Give a high-level overview of your application and its features. 
-3. Where does the data come from (which external API)? 
-4. How is this data inserted into your database? 
-5. How is the data structured (into tables or collections)? 
-6. How is the application code structured (MVC model)? 
-7. Does your application cover all 4 CRUD operations? How? 
-8. How might using a database instead of an external API directly benefit an application? 
-9. How might you extend the features of your application in the future? 
-
-## Grading Criteria
-
-| Score | Criteria |
-| --- | --- |
-| **10** | **Excellent:** Fully functional, original application that meets all objectives, uses well-structured code, and includes strong evidence of design/requirements planning. |
-| **8/9** | **Great:** Mostly functional application covering main objectives, with tidy code and clear evidence of planning. |
-| **7** | **Satisfactory:** Minimal planning/design; application includes core features with some attempts at well-structured code. |
-| **≤ 6** | **Needs Improvement:** Reliance on code copied from elsewhere, important features incomplete, mostly messy/unstructured code, and no design process. |
+All interaction with the system is performed through REST API requests using Hoppscotch.
 
 ---
 
-### Grading Components breakdown:
 
-- **Evidence of design/requirements:** Figma, hand-drawn diagrams, or bulleted lists created prior to coding.
-- **Functionality:** Original application covering required objectives with good usability.
-- **Coding:** Code is tidy, logical, well-structured, and avoids repetition.
+## Logical and Physical Models
 
----
+- **Users:** Represent people using the system.
+- **Topics:** Curated categories such as confidence, guidance, worried, etc.
+- **Verses:** Individual Bible verses fetched from an external Bible API and stored locally.
+- **Favorites:** Saved/bookmarked topics or verses for a user.
+- **History:** Records of user interactions (e.g., viewing a topic or verse).
+
+## Logical Model
+
+### Entities
+- User  
+- Topic  
+- Verse  
+- Favorite  
+- History  
+
+### Relationships
+- A **User** can have **many Favorites**, but each **Favorite** belongs to **one User**.
+- A **User** can have **many History** records, but each **History** record belongs to **one User**.
+- A **Topic** can reference **many Verses**, but each **Verse** belongs to **one Topic**.
+- A **Favorite** references **one Topic or one Verse**.
+- A **History** record references **one Topic or one Verse**.
+
+### Relationship Summary
+- USER 1:M FAVORITE (saves)
+- USER 1:M HISTORY (tracks)
+- TOPIC 1:M VERSE (categorizes)
+- FAVORITE M:1 USER (belongs to)
+- HISTORY M:1 USER (belongs to)
+- FAVORITE → TOPIC or VERSE (polymorphic reference)
+- HISTORY → TOPIC or VERSE (polymorphic reference)
+
