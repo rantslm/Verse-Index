@@ -38,9 +38,7 @@ Users of the system can:
 - Create or select a user session
 - View a list of available topics
 - Retrieve verses associated with a topic
-- Save (favorite) topics or verses
-- View their saved favorites
-- View a history of their interactions
+- Save (favorite) topics or verses and access them.
 
 ### Application Architecture (Visual Layout)
 
@@ -52,21 +50,12 @@ The application is structured as two backend services:
   - Handles content-related database operations
 
 - **User Service (Port 3002)**
-  - Manages users, favorites, and history
+  - Manages users and favorites
   - Handles user-specific data and interactions
 
 All interaction with the system is performed through REST API requests using Hoppscotch.
 
 ---
-
-
-## Logical and Physical Models
-
-- **Users:** Represent people using the system.
-- **Topics:** Curated categories such as confidence, guidance, worried, etc.
-- **Verses:** Individual Bible verses fetched from an external Bible API and stored locally.
-- **Favorites:** Saved/bookmarked topics or verses for a user.
-- **History:** Records of user interactions (e.g., viewing a topic or verse).
 
 ## Logical Model
 
@@ -74,22 +63,60 @@ All interaction with the system is performed through REST API requests using Hop
 - User  
 - Topic  
 - Verse  
-- Favorite  
-- History  
+- Favorite    
 
 ### Relationships
-- A **User** can have **many Favorites**, but each **Favorite** belongs to **one User**.
-- A **User** can have **many History** records, but each **History** record belongs to **one User**.
 - A **Topic** can reference **many Verses**, but each **Verse** belongs to **one Topic**.
-- A **Favorite** references **one Topic or one Verse**.
-- A **History** record references **one Topic or one Verse**.
+- A **User** can create **many Favorites**, but each **Favorite** is created by **one User**.
+- A **Verse** can receive **many Favorites**, but each **Favorite** references **one Verse**.
+- A **User** can favorite **many Verses**, and a **Verse** can be favorited by **many Users**.  
+  This many-to-many relationship is implemented using the **Favorite** entity.
 
 ### Relationship Summary
-- USER 1:M FAVORITE (saves)
-- USER 1:M HISTORY (tracks)
-- TOPIC 1:M VERSE (categorizes)
-- FAVORITE M:1 USER (belongs to)
-- HISTORY M:1 USER (belongs to)
-- FAVORITE → TOPIC or VERSE (polymorphic reference)
-- HISTORY → TOPIC or VERSE (polymorphic reference)
+- TOPIC 1:M VERSE (contains)
+- USER 1:M FAVORITE (creates)
+- VERSE 1:M FAVORITE (receives)
+- USER M:N VERSE (favorites) via FAVORITE
 
+## Physical Model 
+
+```mermaid
+erDiagram
+    TOPIC ||--o{ VERSE : contains
+    USER ||--o{ FAVORITE : creates
+    VERSE ||--o{ FAVORITE : receives
+
+    USER {
+        int id PK
+        string username "UNIQUE"
+        string role "user|admin"
+        datetime created_at
+    }
+    
+    TOPIC {
+        int id PK
+        string name
+        string slug "UNIQUE"
+        text description
+        datetime created_at
+    }
+    
+    VERSE {
+        int id PK
+        int topic_id FK
+        string reference
+        string book
+        int chapter
+        int verse
+        text text
+        string version
+        datetime created_at
+    }
+    
+    FAVORITE {
+        int id PK
+        int user_id FK
+        int verse_id FK
+        datetime created_at
+    }
+```
