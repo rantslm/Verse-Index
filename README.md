@@ -238,3 +238,47 @@ In the Workbench GUI verify the `verses` table was created correctly.
    - `ON DELETE` is set to **CASCADE**
 
 If all items above are visible in the schema browser, the `verses` table has been created and linked correctly.
+
+### Step 5: Create the `favorites` Table 
+This junction table represents a many-to-many relationship between `users` to `verses`. One user can favorite many verses. One verse can be favorited by many users. 
+
+The biggest requirement here is preventing duplicates --a user can only favorite the same verse once-- by adding a composite UNIQUE constraint of `(user_id, verse_id)`.
+
+
+```sql
+CREATE TABLE favorites (
+    id INT AUTO_INCREMENT,-- Primary key, auto-generated unique ID for each favorite row
+    user_id INT NOT NULL,-- Foreign key to users.id
+    verse_id INT NOT NULL,-- Foreign key to verses.id
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Timestamp for when it was favorited
+    PRIMARY KEY (id),-- Defines `id` as the primary key
+    UNIQUE KEY unique_user_verse (user_id, verse_id), -- Prevent duplicates: a user can only favorite a specific verse once
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (verse_id) REFERENCES verses(id) ON DELETE CASCADE
+);
+```
+
+In the **Schemas** panel → expand `verse_index_sql` → `Tables`
+
+Confirm the following tables exist:
+- `users`
+- `topics`
+- `verses`
+- `favorites`
+
+Expand `favorites` and verify:
+
+**Columns**
+- `id`
+- `user_id`
+- `verse_id`
+- `created_at`
+
+**Indexes**
+- `PRIMARY` (on `id`)
+- `unique_user_verse` (UNIQUE on `user_id`, `verse_id`) — prevents duplicate favorites
+
+**Foreign Keys**
+- `favorites.user_id → users.id` (ON DELETE CASCADE)
+- `favorites.verse_id → verses.id` (ON DELETE CASCADE)
+
