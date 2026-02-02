@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const { sequelize } = require('./config/db.js');
+const { topicRouter } = require('./routes/topicRoutes');
 
 // Models
 require('./models/user.js');
@@ -12,6 +13,7 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use('/api/topics', topicRouter);
 
 // basic route so browser doesn't say "Cannot GET /"
 app.get('/', (req, res) => {
