@@ -40,22 +40,39 @@ Users of the system can:
 - Retrieve verses associated with a topic
 - Save (favorite) topics or verses and access them.
 
-### Application Architecture (Visual Layout)
+### Application Architecture
+This application is a single Express-based REST API built using the MVC pattern.
 
-The application is structured as two backend services:
+- **Server Layer**
+  - Express.js server
+  - Sequelize ORM for MySQL
+  - Environment-based configuration using dotenv
 
-- **Content Service (Port 3001)**
-  - Manages topics and verses
-  - Integrates with the external Bible API
-  - Handles content-related database operations
+- **Model Layer**
+  - MySQL tables managed through Sequelize models
+  - Topics, Verses, Users, Favorites
 
-- **User Service (Port 3002)**
-  - Manages users and favorites
-  - Handles user-specific data and interactions
+- **Controller Layer**
+  - Handles request logic for topics, verses, users, and favorites
+  - Fetches external Bible data during startup seeding
 
-All interaction with the system is performed through REST API requests using Hoppscotch.
+- **Routes Layer**
+  - RESTful endpoints consumed via Hoppscotch
+
+The application integrates an external Bible API to populate verse data, which is then persisted locally in MySQL.
 
 ---
+### Data Flow Overview
+
+1. On server startup, the application:
+   - Reads predefined topics and verse references
+   - Fetches verse text from the external Bible API
+   - Stores verses in the MySQL database
+
+2. Clients (via Hoppscotch) request data through REST endpoints.
+
+3. The API serves data directly from MySQL without repeatedly calling the external API.
+
 
 ## Logical Model
 
