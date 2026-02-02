@@ -5,6 +5,8 @@ const { sequelize } = require('./config/db.js');
 // Models
 require('./models/user.js');
 require('./models/Topic.js');
+require('./models/verse.js');
+require('./models/favorite.js');
 
 const app = express();
 
