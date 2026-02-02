@@ -120,3 +120,35 @@ erDiagram
         datetime created_at
     }
 ```
+
+## MySQL
+
+### Step 1: Create the Database
+
+1. Open **MySQL Workbench**
+2. Connect to your local MySQL instance
+3. Open a new query tab
+4. Run the following commands:
+
+```sql
+CREATE DATABASE verse_index_sql;
+USE verse_index_sql;
+```
+Verify with the command `SELECT DATABASE();`  
+The output should be "verse_index_sql"
+
+## Step 2: Create the `users` Table
+This is created first because it does not depend on any other tables.
+```sql
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    role VARCHAR(10) NOT NULL DEFAULT 'user',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+Verify the table structure and constraints with the command `SHOW INDEX FROM users;`
+It should return two indexes: 
+-PRIMARY index on `id`
+-UNIQUE index on `username`
+
