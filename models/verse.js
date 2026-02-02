@@ -1,7 +1,7 @@
 // models/verse.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
-const { Topic } = require('./Topic'); // adjust if your filename differs (topic.js)
+const { Topic } = require('./Topic'); 
 
 /**
  * Verse Model
@@ -66,6 +66,8 @@ const Verse = sequelize.define(
   {
     timestamps: true,
     tableName: 'verses',
+    createdAt: 'created_at',
+    updatedAt: false,
     underscored: true,
   },
 );

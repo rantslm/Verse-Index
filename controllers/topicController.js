@@ -1,4 +1,4 @@
-const { Topic } = require('../models/topic');
+const { Topic } = require('../models/Topic');
 
 const getTopics = async (req, res) => {
   try {
