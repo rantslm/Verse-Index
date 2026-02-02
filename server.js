@@ -4,6 +4,8 @@ const { sequelize } = require('./config/db.js');
 const { topicRouter } = require('./routes/topicRoutes');
 const { verseRouter } = require('./routes/verseRoutes');
 
+const { runStartupSeed } = require("./seed/startupSeed");
+
 // Models
 require('./models/user.js');
 require('./models/Topic.js');
@@ -23,14 +25,16 @@ app.get('/', (req, res) => {
     res.json({ ok: true, message: 'Verse Index SQL API is running ✅'});
     });
 
-
-
-
 const startServer = async () => {
     try {
+        await sequelize.authenticate();
+        console.log("✅ MySQL Authenticated");
+
         await sequelize.sync({ force: false });
         console.log('✅ MySQL Connected and Models Synced');
         
+        await runStartupSeed();
+
         const PORT = process.env.PORT || 3000;
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
