@@ -2,6 +2,10 @@ const express = require('express');
 require('dotenv').config();
 const { sequelize } = require('./config/db.js');
 
+// Models
+require('./models/user.js');
+require('./models/Topic.js');
+
 const app = express();
 
 // Middleware to parse JSON bodies
