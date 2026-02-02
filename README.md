@@ -282,3 +282,80 @@ Expand `favorites` and verify:
 - `favorites.user_id → users.id` (ON DELETE CASCADE)
 - `favorites.verse_id → verses.id` (ON DELETE CASCADE)
 
+### Step 6: Seed Test Data
+This step verifies that the database schema, foreign keys, and constraints function correctly by inserting a small set of test data.  
+
+For this test, the following data is used:
+
+- User: `leilani`
+- Topic: `stressed`
+- Verses:
+  - Exodus 18:13–26
+  - Matthew 11:28–30
+  - Mark 6:31–32
+
+#### 6.1 Insert a User
+
+```sql
+INSERT INTO users (username, role)
+VALUES ('leilani', 'user');
+```
+
+#### 6.2 Insert a Topic
+
+```sql
+INSERT INTO topics (name, slug, description) VALUES 
+('Stressed', 'stressed', 'Verses for when you feel stressed or overwhelmed.');
+```
+
+#### 6.3 Insert Verses for the Topic
+First, we get the topic id:
+```sql
+SELECT id FROM topics WHERE slug = 'stressed';
+```
+Use that `id` value as `topic_id` in the inserts below --it will be 1 since it's our first topic. At this stage, verse text may be stored as placeholder content. In the implementation phase, verse text will be fetched from the external Bible API during application startup.
+
+```sql
+INSERT INTO verses (topic_id, reference, book, chapter, verse_number, text, version) VALUES
+(1, 'Exodus 18:13-26', 'exodus', 18, 13, '[PLACEHOLDER TEXT]', 'en-kjv'),
+(1, 'Matthew 11:28-30', 'matthew', 11, 28, '[PLACEHOLDER TEXT]', 'en-kjv'),
+(1, 'Mark 6:31-32', 'mark', 6, 31, '[PLACEHOLDER TEXT]', 'en-kjv');
+```
+
+#### 6.4 Favorite a Verse
+First, get the user id and a verse id:
+```sql
+SELECT id FROM users WHERE username = 'leilani';
+SELECT id, reference FROM verses WHERE topic_id = 1;
+```
+Insert a favorite record linking user `leilani` to one of the verses.
+```sql
+INSERT INTO favorites (user_id, verse_id)
+VALUES (1, 1);
+```
+
+#### 6.5 Attempt a Duplicate Favorite 
+Try to insert the **same user–verse favorite combination again**.
+```sql
+INSERT INTO favorites (user_id, verse_id)
+VALUES (1, 1);
+```
+This should fail.
+
+#### 6.6 Final Verification
+Confirm the verses are linked to the topic:
+```sql
+SELECT topics.slug, verses.reference
+FROM verses
+JOIN topics ON verses.topic_id = topics.id
+WHERE topics.slug = 'stressed';
+```
+Confirm `leilani` has a favorite saved:
+```sql
+SELECT users.username, verses.reference
+FROM favorites
+JOIN users ON favorites.user_id = users.id
+JOIN verses ON favorites.verse_id = verses.id
+WHERE users.username = 'leilani';
+```
+
