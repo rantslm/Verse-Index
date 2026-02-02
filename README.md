@@ -28,7 +28,6 @@ Example: Fetch John 3:16 in the King James Version (KJV):
 - Populate and persist topics and verses in a MySQL database
 - Provide REST API endpoints for retrieving topics and verses
 - Allow users to save favorite topics or verses
-- Track user interaction history (e.g., viewed topics or verses)
 - Support full CRUD (Create, Read, Update, Delete) operations on core resources
 
 ### User Capabilities
@@ -72,6 +71,27 @@ The application integrates an external Bible API to populate verse data, which i
 2. Clients (via Hoppscotch) request data through REST endpoints.
 
 3. The API serves data directly from MySQL without repeatedly calling the external API.
+
+### API Routes
+The application exposes RESTful endpoints that allow clients to retrieve topics, verses, and manage user favorites. All endpoints are tested using **Hoppscotch**.
+
+### Topics
+- `GET /api/topics`
+  - Returns a list of all available topics.
+
+### Verses
+- `GET /api/verses`
+  - Returns all verses stored in the database.
+- `GET /api/verses/topic/:topicId`
+  - Returns all verses associated with a specific topic.
+
+### Favorites
+- `POST /api/favorites`
+  - Saves a verse as a favorite for a user.
+- `GET /api/favorites/:userId`
+  - Retrieves all favorited verses for a user.
+
+CRUD operations are demonstrated through these endpoints and verified via Hoppscotch.
 
 
 ## Logical Model
@@ -124,7 +144,7 @@ erDiagram
         string reference
         string book
         int chapter
-        int verse
+        verse_number
         text text
         string version
         datetime created_at
@@ -330,7 +350,13 @@ First, we get the topic id:
 ```sql
 SELECT id FROM topics WHERE slug = 'stressed';
 ```
-Use that `id` value as `topic_id` in the inserts below --it will be 1 since it's our first topic. At this stage, verse text may be stored as placeholder content. In the implementation phase, verse text will be fetched from the external Bible API during application startup.
+Use that `id` value as `topic_id` in the inserts below.
+
+In the final implementation, verse text is **not manually inserted**.  
+Instead, verses are fetched from the external Bible API during application startup and automatically persisted to the database.
+
+The SQL below is provided only as a **conceptual example** to demonstrate the table structure and foreign key relationships.
+
 
 ```sql
 INSERT INTO verses (topic_id, reference, book, chapter, verse_number, text, version) VALUES
