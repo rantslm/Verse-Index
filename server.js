@@ -3,7 +3,7 @@ require('dotenv').config();
 const { sequelize } = require('./config/db.js');
 const { topicRouter } = require('./routes/topicRoutes');
 const { verseRouter } = require('./routes/verseRoutes');
-
+const { favoriteRouter } = require('./routes/favoriteRoutes');
 const { runStartupSeed } = require("./seed/startupSeed");
 
 // Models
@@ -18,7 +18,7 @@ const app = express();
 app.use(express.json());
 app.use('/api/topics', topicRouter);
 app.use('/api/verses', verseRouter);
-
+app.use('/api/favorites', favoriteRouter); 
 
 // basic route so browser doesn't say "Cannot GET /"
 app.get('/', (req, res) => {

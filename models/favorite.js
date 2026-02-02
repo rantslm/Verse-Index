@@ -36,6 +36,8 @@ const Favorite = sequelize.define(
     tableName: 'favorites',
     underscored: true,
     timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: false,
     indexes: [
       {
         unique: true,

@@ -38,6 +38,9 @@ const Topic = sequelize.define(
   {
     tableName: 'topics',
     timestamps: false, // because i used created_at in SQL
+    createdAt: 'created_at',
+    updatedAt: false,
+    underscored: true,
   },
 );
 
