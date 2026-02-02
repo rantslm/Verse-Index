@@ -158,13 +158,13 @@ The `topics` table represents curated thematic categories such as *sadness*, *ju
 
 ```sql
 CREATE TABLE topics (
-    id INT AUTO_INCREMENT,              -- Primary key, auto-generated unique ID for each topic
-    name VARCHAR(100) NOT NULL,          -- Topic name (e.g., "Confidence")
-    slug VARCHAR(100) NOT NULL UNIQUE,   -- URL-safe unique identifier (e.g., "confidence")
-    description TEXT,                   -- Optional longer description of the topic
+    id INT AUTO_INCREMENT, -- Primary key, auto-generated unique ID for each topic
+    name VARCHAR(100) NOT NULL, -- Topic name (e.g., "Confidence")
+    slug VARCHAR(100) NOT NULL UNIQUE,-- URL-safe unique identifier (e.g., "confidence")
+    description TEXT,-- Optional longer description of the topic
     created_at DATETIME NOT NULL 
-        DEFAULT CURRENT_TIMESTAMP,       -- Timestamp for when the topic was created
-    PRIMARY KEY (id)                     -- Defines `id` as the primary key
+        DEFAULT CURRENT_TIMESTAMP,-- Timestamp for when the topic was created
+    PRIMARY KEY (id) -- Defines `id` as the primary key
 );
 ``` 
 
@@ -186,3 +186,55 @@ After running `SHOW INDEX FROM topics;`
 It should return:
 - A PRIMARY index on id
 - A UNIQUE index on slug
+
+###  Step 4: Create the `verses` Table
+The `verses` table stores individual Bible verses fetched from the external Bible API and saved locally. Each verse belongs to exactly one topic, so this table contains a foreign key: `topic_id` → `topics.id`
+
+```sql
+
+CREATE TABLE verses (
+    id INT AUTO_INCREMENT,-- Primary key, auto-generated unique ID for each verse
+    topic_id INT NOT NULL,-- Foreign key linking the verse to a topic
+    reference VARCHAR(50) NOT NULL,-- Full reference string (e.g., "John 3:16")
+    book VARCHAR(50) NOT NULL,-- Book name (e.g., "john")
+    chapter INT NOT NULL,-- Chapter number
+    verse_number INT NOT NULL,-- Verse number
+    text TEXT NOT NULL,-- Verse text content
+    version VARCHAR(20) NOT NULL,-- Bible version (e.g., "en-kjv")
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,-- Timestamp for when the verse row was created
+    PRIMARY KEY (id),-- Defines `id` as the primary key
+    FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE CASCADE -- Enforces Topic 1:M Verse; deletes verses if topic is deleted
+);
+``` 
+
+In the Workbench GUI verify the `verses` table was created correctly.
+
+1. In the **Schemas** panel, expand:
+   - `verse_index_sql`
+   - `Tables`
+
+2. Confirm that the following tables are listed:
+   - `topics`
+   - `users`
+   - `verses`
+
+3. Expand the `verses` table and confirm the **Columns** section includes:
+     - `id`
+     - `topic_id`
+     - `reference`
+     - `book`
+     - `chapter`
+     - `verse_number`
+     - `text`
+     - `version`
+     - `created_at`
+
+4. Expand **Indexes** under `verses` and confirm:
+   - A **PRIMARY** index exists on `id`
+
+5. Expand **Foreign Keys** under `verses` and confirm:
+   - A foreign key exists linking:
+     - `verses.topic_id → topics.id`
+   - `ON DELETE` is set to **CASCADE**
+
+If all items above are visible in the schema browser, the `verses` table has been created and linked correctly.
