@@ -137,14 +137,14 @@ USE verse_index_sql;
 Verify with the command `SELECT DATABASE();`  
 The output should be "verse_index_sql"
 
-## Step 2: Create the `users` Table
+### Step 2: Create the `users` Table
 This is created first because it does not depend on any other tables.
 ```sql
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    role VARCHAR(10) NOT NULL DEFAULT 'user',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    username VARCHAR(50) NOT NULL UNIQUE, -- username up to 50 characters, required, and unique to each user
+    role VARCHAR(10) NOT NULL DEFAULT 'user', -- required, 10 character text field, becomes user by default
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP -- stores date and time, required, and automatically set when inserted
 );
 ```
 Verify the table structure and constraints with the command `SHOW INDEX FROM users;`
@@ -152,3 +152,37 @@ It should return two indexes:
 -PRIMARY index on `id`
 -UNIQUE index on `username`
 
+### Step 3: Create the `topics` Table
+
+The `topics` table represents curated thematic categories such as *sadness*, *justice*, or *parenting*. Each topic can be associated with multiple Bible verses. This table is created before the `verses` table because it is a parent entity that other tables will reference via foreign keys.
+
+```sql
+CREATE TABLE topics (
+    id INT AUTO_INCREMENT,              -- Primary key, auto-generated unique ID for each topic
+    name VARCHAR(100) NOT NULL,          -- Topic name (e.g., "Confidence")
+    slug VARCHAR(100) NOT NULL UNIQUE,   -- URL-safe unique identifier (e.g., "confidence")
+    description TEXT,                   -- Optional longer description of the topic
+    created_at DATETIME NOT NULL 
+        DEFAULT CURRENT_TIMESTAMP,       -- Timestamp for when the topic was created
+    PRIMARY KEY (id)                     -- Defines `id` as the primary key
+);
+``` 
+
+Verify the table was created with the command `SHOW TABLES;`
+
+The output should include:
+- users
+- topics
+
+Then verify running `DESCRIBE topics;`
+
+Confirm that:
+- id is the primary key
+- slug is marked as UNIQUE
+- created_at has a default timestamp
+
+After running `SHOW INDEX FROM topics;`
+
+It should return:
+- A PRIMARY index on id
+- A UNIQUE index on slug
