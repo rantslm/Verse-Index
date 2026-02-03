@@ -144,7 +144,7 @@ erDiagram
         string reference
         string book
         int chapter
-        verse_number
+        int verse_number
         text text
         string version
         datetime created_at
