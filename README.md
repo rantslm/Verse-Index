@@ -1,4 +1,4 @@
-# Mini-Project 3
+# Verse Index
 
 ## Project Overview
 
@@ -158,7 +158,303 @@ erDiagram
     }
 ```
 
-## MySQL
+
+## Tech Stack
+
+- **Node.js**
+- **Express.js**
+- **MySQL**
+- **Sequelize**
+- **dotenv**
+- **Axios / Fetch for external API integration**
+- **Hoppscotch for API testing**
+
+## Feedback
+
+Strengths highlighted in feedback included:
+
+- comprehensive documentation and planning
+- strong relational database design
+- clear data flow from external API to local database
+- professional Mermaid ER diagram
+- clean MVC architecture
+- modular service-based approach to API fetching
+- robust error handling and readable code
+- proper use of Sequelize associations and constraints
+- smart startup seeding strategy that avoids repeated external API dependency
+
+The project was recognized as a strong backend implementation with thoughtful engineering decisions, clean organization, and realistic database design.
+
+## Work In Progress
+
+The following are the main next-step improvements for the project:
+
+- add missing Update operations for topics, verses, or users
+- fix `package.json` so the `main` field points to `server.js`
+- add an `npm start` script
+- add request validation using a library such as Joi or express-validator
+- generate API documentation with Swagger/OpenAPI
+- add Jest tests for controllers and services
+- implement structured logging
+- add authentication with JWT
+- expand the number of supported topics
+- split the system into separate content-service and user-service layers
+
+## Reflection
+
+This project strengthened my understanding of:
+
+- building REST APIs with Express and Sequelize
+- designing relational schemas before implementation
+- modeling many-to-many relationships with junction tables
+- using startup seeding to convert external API data into internal application data
+- organizing backend code using MVC principles
+- thinking about database integrity, scalability, and maintainability together
+
+It also gave me more practice presenting backend architecture clearly and explaining the reasoning behind technical decisions.
+
+## Repository Notes
+
+This public repository is a portfolio version of the project and preserves the development history of the original work.
+
+## Setup Instructions
+
+1. Clone the repository
+2. Install dependencies
+3. Create a `.env` file with your MySQL credentials
+4. Create the `verse_index_sql` database in MySQL
+5. Run the server and allow the startup seed process to populate the database
+6. Test endpoints using Hoppscotch or Postman
+
+# Verse Index
+
+## Project Overview
+
+This project is a backend API that provides topical Bible verses based on curated themes such as life events or emotional states. The application integrates with an external Bible API, stores the data in a MySQL database, and exposes REST endpoints for interacting with the data. All functionality is demonstrated using API tools such as Hoppscotch.
+
+### External Data Source: Bible API
+
+This project integrates with the **Bible API** by wldeh, a free and publicly accessible REST API that provides Bible verses and chapters in JSON format. [View Bible API Repository](https://github.com/wldeh/bible-api)
+
+- No API key or authentication is required
+- Supports multiple Bible versions (e.g., ASV, KJV)
+- Provides verse-level and chapter-level access
+- Serves public-domain Bible translations
+
+The Bible API is used during the application startup process to fetch specific verses based on predefined topics. These verses are then stored locally in the MySQL database so the application does not rely on the external API for every request.
+
+To obtain a specific verse, send a request to the following endpoint:
+`https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/${version}/books/${book}/chapters/${chapter}/verses/${verse}.json`
+Replace ${version}, ${book}, ${chapter}, and ${verse} with the appropriate values.
+
+Example: Fetch John 3:16 in the King James Version (KJV):
+`https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/en-kjv/books/john/chapters/3/verses/16.json`
+
+### Core Functionality
+
+- Fetch Bible verses from an external Bible API during application startup
+- Populate and persist topics and verses in a MySQL database
+- Provide REST API endpoints for retrieving topics and verses
+- Allow users to save favorite verses
+- Support full CRUD (Create, Read, Update, Delete) operations on core resources
+
+### User Capabilities
+
+Users of the system can:
+
+- Create or select a user session
+- View a list of available topics
+- Retrieve verses associated with a topic
+- Save (favorite) topics or verses and access them.
+
+### Application Architecture
+This application is a single Express-based REST API built using the MVC pattern.
+
+- **Server Layer**
+  - Express.js server
+  - Sequelize ORM for MySQL
+  - Environment-based configuration using dotenv
+
+- **Model Layer**
+  - MySQL tables managed through Sequelize models
+  - Topics, Verses, Users, Favorites
+
+- **Controller Layer**
+  - Handles request logic for topics, verses, users, and favorites
+  - Fetches external Bible data during startup seeding
+
+- **Routes Layer**
+  - RESTful endpoints consumed via Hoppscotch
+
+The application integrates an external Bible API to populate verse data, which is then persisted locally in MySQL.
+
+---
+### Data Flow Overview
+
+1. On server startup, the application:
+   - Reads predefined topics and verse references
+   - Fetches verse text from the external Bible API
+   - Stores verses in the MySQL database
+
+2. Clients (via Hoppscotch) request data through REST endpoints.
+
+3. The API serves data directly from MySQL without repeatedly calling the external API.
+
+### API Routes
+The application exposes RESTful endpoints that allow clients to retrieve topics, verses, and manage user favorites. All endpoints are tested using **Hoppscotch**.
+
+### Topics
+- `GET /api/topics`
+  - Returns a list of all available topics.
+
+### Verses
+- `GET /api/verses`
+  - Returns all verses stored in the database.
+- `GET /api/verses/topic/:topicId`
+  - Returns all verses associated with a specific topic.
+
+### Favorites
+- `POST /api/favorites`
+  - Saves a verse as a favorite for a user.
+- `GET /api/favorites/:userId`
+  - Retrieves all favorited verses for a user.
+
+CRUD operations are demonstrated through these endpoints and verified via Hoppscotch.
+
+
+## Logical Model
+
+### Entities
+- User  
+- Topic  
+- Verse  
+- Favorite    
+
+### Relationships
+- A **Topic** can reference **many Verses**, but each **Verse** belongs to **one Topic**.
+- A **User** can create **many Favorites**, but each **Favorite** is created by **one User**.
+- A **Verse** can receive **many Favorites**, but each **Favorite** references **one Verse**.
+- A **User** can favorite **many Verses**, and a **Verse** can be favorited by **many Users**.  
+  This many-to-many relationship is implemented using the **Favorite** entity.
+
+### Relationship Summary
+- TOPIC 1:M VERSE (contains)
+- USER 1:M FAVORITE (creates)
+- VERSE 1:M FAVORITE (receives)
+- USER M:N VERSE (favorites) via FAVORITE
+
+## Physical Model 
+
+```mermaid
+erDiagram
+    TOPIC ||--o{ VERSE : contains
+    USER ||--o{ FAVORITE : creates
+    VERSE ||--o{ FAVORITE : receives
+
+    USER {
+        int id PK
+        string username "UNIQUE"
+        string role "user|admin"
+        datetime created_at
+    }
+    
+    TOPIC {
+        int id PK
+        string name
+        string slug "UNIQUE"
+        text description
+        datetime created_at
+    }
+    
+    VERSE {
+        int id PK
+        int topic_id FK
+        string reference
+        string book
+        int chapter
+        int verse_number
+        text text
+        string version
+        datetime created_at
+    }
+    
+    FAVORITE {
+        int id PK
+        int user_id FK
+        int verse_id FK
+        datetime created_at
+    }
+```
+
+
+## Tech Stack
+
+- **Node.js**
+- **Express.js**
+- **MySQL**
+- **Sequelize**
+- **dotenv**
+- **Axios / Fetch for external API integration**
+- **Hoppscotch for API testing**
+
+## Feedback
+
+Strengths highlighted in feedback included:
+
+- comprehensive documentation and planning
+- strong relational database design
+- clear data flow from external API to local database
+- professional Mermaid ER diagram
+- clean MVC architecture
+- modular service-based approach to API fetching
+- robust error handling and readable code
+- proper use of Sequelize associations and constraints
+- smart startup seeding strategy that avoids repeated external API dependency
+
+The project was recognized as a strong backend implementation with thoughtful engineering decisions, clean organization, and realistic database design.
+
+## Work In Progress
+
+The following are the main next-step improvements for the project:
+
+- add missing Update operations for topics, verses, or users
+- fix `package.json` so the `main` field points to `server.js`
+- add an `npm start` script
+- add request validation using a library such as Joi or express-validator
+- generate API documentation with Swagger/OpenAPI
+- add Jest tests for controllers and services
+- implement structured logging
+- add authentication with JWT
+- expand the number of supported topics
+- split the system into separate content-service and user-service layers
+
+## Reflection
+
+This project strengthened my understanding of:
+
+- building REST APIs with Express and Sequelize
+- designing relational schemas before implementation
+- modeling many-to-many relationships with junction tables
+- using startup seeding to convert external API data into internal application data
+- organizing backend code using MVC principles
+- thinking about database integrity, scalability, and maintainability together
+
+It also gave me more practice presenting backend architecture clearly and explaining the reasoning behind technical decisions.
+
+## Repository Notes
+
+This public repository is a portfolio version of the project and preserves the development history of the original work.
+
+# Setup Instructions
+
+1. Clone the repository
+2. Install dependencies
+3. Create a `.env` file with your MySQL credentials
+4. Create the `verse_index_sql` database in MySQL as detailed below
+5. Run the server and allow the startup seed process to populate the database
+6. Test endpoints using Hoppscotch or Postman
+
+## MySQL Setup Details
 
 ### Step 1: Create the Database
 
@@ -401,4 +697,3 @@ JOIN users ON favorites.user_id = users.id
 JOIN verses ON favorites.verse_id = verses.id
 WHERE users.username = 'leilani';
 ```
-
